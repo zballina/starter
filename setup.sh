@@ -20,4 +20,10 @@ echo "==> Sincronizando plugins de Neovim..."
 # Ejecuta lazy sync de forma no interactiva
 nvim --headless "+Lazy! sync" +qa
 
+# Configuración de LazyGit con Gemini
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/setup_lazygit.sh" ]; then
+  bash "$SCRIPT_DIR/setup_lazygit.sh"
+fi
+
 echo "==> ¡Configuración completada con éxito!"

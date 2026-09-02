@@ -1,0 +1,15 @@
+gui:
+  border: "rounded"
+  showFileTree: true
+  showRandomTip: false
+
+git:
+  autoFetch: true
+
+customCommands:
+  - key: "<c-g>"
+    context: "files"
+    description: "Generate commit with Gemini"
+    loadingText: "Generating commit message with AI..."
+    output: "terminal"
+    command: "bash \"$HOME/.config/lazygit/scripts/gemini-commit.sh\""

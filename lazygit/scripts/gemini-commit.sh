@@ -138,7 +138,7 @@ $MSG
 
 # ----------------------------------------------------------------------
 # Líneas que comiencen con '#' serán ignoradas automáticamente por Git.
-# - Para CONFIRMAR: guarda y sal (:wq).
+# - Para CONFIRMAR: presiona ENTER (o guarda y sal con :wq).
 # - Para ABORTAR: sal con error (:cq) o borra el texto y guarda (:wq).
 # ----------------------------------------------------------------------
 EOF

@@ -22,7 +22,7 @@ local function open_lazygit_floating(repo_path)
   local buf = vim.api.nvim_create_buf(false, true)
 
   -- 2. Dimensiones de la ventana flotante (Ajustadas a 95% ancho x 100% alto)
-  local width = math.floor(vim.o.columns * 0.95)
+  local width = math.floor(vim.o.columns * 1)
   local height = math.floor(vim.o.lines * 1)
   local col = math.floor((vim.o.columns - width) / 2)
   local row = math.floor((vim.o.lines - height) / 2)

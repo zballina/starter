@@ -37,10 +37,10 @@ M.term = {
   -- Tamaño y posición de la terminal flotante (<Option-i>):
   float = {
     relative = "editor",
-    row = 0.1,
-    col = 0.1,
+    row = 0.02,
+    col = 0.0,
     width = 1.0,  -- 100% del ancho de la pantalla
-    height = 0.85, -- 85% de la altura de la pantalla
+    height = 0.90, -- 90% de la altura de la pantalla
     border = "rounded",
   },
 }

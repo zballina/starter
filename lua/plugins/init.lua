@@ -83,6 +83,20 @@ return {
     opts = {},
     event = "BufReadPost",
   },
+  {
+    "linux-cultist/venv-selector.nvim",
+    dependencies = {
+      "neovim/nvim-lspconfig",
+      "nvim-telescope/telescope.nvim",
+    },
+    ft = "python",
+    cmd = { "VenvSelect", "VenvSelectCached" },
+    opts = {},
+    keys = {
+      { "<leader>cv", "<cmd>VenvSelect<cr>", desc = "Select Python VirtualEnv" },
+      { "<leader>cc", "<cmd>VenvSelectCached<cr>", desc = "Select Cached VirtualEnv" },
+    },
+  },
   -- test new blink
   -- { import = "nvchad.blink.lazyspec" },
 

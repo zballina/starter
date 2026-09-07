@@ -6,7 +6,32 @@
 [ -f "$HOME/.zshrc" ] && source "$HOME/.zshrc" >/dev/null 2>&1
 [ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc" >/dev/null 2>&1
 
-export PATH="/usr/local/bin:/opt/homebrew/bin:$HOME/.local/bin:$PATH"
+# Extraer GEMINI_API_KEY y GEMINI_MODEL si no vienen en el entorno (ej. al abrir Neovim desde Automator/Finder)
+if [ -z "$GEMINI_API_KEY" ]; then
+  for rc in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.zshenv"; do
+    if [ -f "$rc" ]; then
+      EXTRACTED_KEY=$(grep -E '^[[:space:]]*export[[:space:]]+GEMINI_API_KEY=' "$rc" 2>/dev/null | head -n 1 | sed -E 's/^[[:space:]]*export[[:space:]]+GEMINI_API_KEY=["'\'']?([^"'\'']+)["'\'']?/\1/')
+      if [ -n "$EXTRACTED_KEY" ]; then
+        export GEMINI_API_KEY="$EXTRACTED_KEY"
+        break
+      fi
+    fi
+  done
+fi
+
+if [ -z "$GEMINI_MODEL" ]; then
+  for rc in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.zshenv"; do
+    if [ -f "$rc" ]; then
+      EXTRACTED_MODEL=$(grep -E '^[[:space:]]*export[[:space:]]+GEMINI_MODEL=' "$rc" 2>/dev/null | head -n 1 | sed -E 's/^[[:space:]]*export[[:space:]]+GEMINI_MODEL=["'\'']?([^"'\'']+)["'\'']?/\1/')
+      if [ -n "$EXTRACTED_MODEL" ]; then
+        export GEMINI_MODEL="$EXTRACTED_MODEL"
+        break
+      fi
+    fi
+  done
+fi
+
+export PATH="/opt/homebrew/bin:/usr/local/bin:/opt/local/bin:$HOME/.local/bin:$PATH"
 
 # Editor para la revisión
 export EDITOR="${EDITOR:-nvim}"
@@ -68,14 +93,14 @@ STAGED_FILES=$(git diff --cached --name-only 2>/dev/null)
 if [ -z "$STAGED_FILES" ]; then
   echo "⚠️ Advertencia: No hay archivos seleccionados en el stage."
   echo "   En lazygit, presiona 'space' sobre los archivos que deseas commitear (o 'a' para todos)."
-  wait_and_exit 5 1
+  wait_and_exit 5 0
 fi
 
 DIFF=$(git diff --cached -- ':!*.DS_Store' ':!*.lock' 2>/dev/null || true)
 
 if [ -z "$DIFF" ]; then
   echo "⚠️ Advertencia: Hay archivos staged, pero no se detectaron cambios de texto analizables (solo binarios o archivos ignorados)."
-  wait_and_exit 5 1
+  wait_and_exit 5 0
 fi
 
 DIFF_TRUNCATED=$(echo "$DIFF" | head -n "$GEMINI_MAX_DIFF_LINES")

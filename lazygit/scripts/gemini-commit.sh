@@ -11,6 +11,20 @@ export PATH="/usr/local/bin:/opt/homebrew/bin:$HOME/.local/bin:$PATH"
 # Editor para la revisión
 export EDITOR="${EDITOR:-nvim}"
 
+# Función de salida con temporizador automático
+wait_and_exit() {
+  local seconds="${1:-5}"
+  local code="${2:-0}"
+  echo ""
+  if [ -e /dev/tty ]; then
+    read -t "$seconds" -n 1 -s -r -p "⏳ Cerrando automáticamente en ${seconds}s (o presiona cualquier tecla)..." < /dev/tty > /dev/tty 2>/dev/null || sleep "$seconds"
+    echo ""
+  else
+    sleep "$seconds"
+  fi
+  exit "$code"
+}
+
 # ==============================================================================
 # 2. Configuración de Gemini API y Fallbacks
 # ==============================================================================
@@ -37,12 +51,12 @@ GEMINI_MAX_RETRIES="${GEMINI_MAX_RETRIES:-2}"
 
 if [ -z "$GEMINI_API_KEY" ]; then
   echo "❌ Error: La variable GEMINI_API_KEY no está definida en tu entorno."
-  exit 1
+  wait_and_exit 5 1
 fi
 
 if ! command -v jq &>/dev/null; then
   echo "❌ Error: 'jq' no está instalado en tu sistema."
-  exit 1
+  wait_and_exit 5 1
 fi
 
 # ==============================================================================
@@ -54,14 +68,14 @@ STAGED_FILES=$(git diff --cached --name-only 2>/dev/null)
 if [ -z "$STAGED_FILES" ]; then
   echo "⚠️ Advertencia: No hay archivos seleccionados en el stage."
   echo "   En lazygit, presiona 'space' sobre los archivos que deseas commitear (o 'a' para todos)."
-  exit 1
+  wait_and_exit 5 1
 fi
 
 DIFF=$(git diff --cached -- ':!*.DS_Store' ':!*.lock' 2>/dev/null || true)
 
 if [ -z "$DIFF" ]; then
   echo "⚠️ Advertencia: Hay archivos staged, pero no se detectaron cambios de texto analizables (solo binarios o archivos ignorados)."
-  exit 1
+  wait_and_exit 5 1
 fi
 
 DIFF_TRUNCATED=$(echo "$DIFF" | head -n "$GEMINI_MAX_DIFF_LINES")
@@ -125,7 +139,7 @@ done
 if [ -z "$MSG" ]; then
   echo "❌ Error: All Gemini models failed to generate a commit message."
   [ -n "$LAST_ERROR" ] && echo "   Last error: $LAST_ERROR"
-  exit 1
+  wait_and_exit 5 1
 fi
 
 # ==============================================================================
@@ -151,7 +165,7 @@ EDITOR_EXIT_CODE=$?
 if [ $EDITOR_EXIT_CODE -ne 0 ]; then
   echo "🚫 Commit abortado (editor cerrado sin confirmar)."
   rm -f "$COMMIT_MSG_FILE"
-  exit 0
+  wait_and_exit 1 0
 fi
 
 # Verificar si el archivo tiene texto real fuera de los comentarios
@@ -160,11 +174,18 @@ CLEANED_MSG=$(grep -v '^[[:space:]]*#' "$COMMIT_MSG_FILE" | tr -d '[:space:]')
 if [ -z "$CLEANED_MSG" ]; then
   echo "🚫 Commit abortado (mensaje vacío)."
   rm -f "$COMMIT_MSG_FILE"
-  exit 0
+  wait_and_exit 2 0
 fi
 
 # ==============================================================================
 # 6. Ejecutar el Commit (descartando líneas comentadas con '#')
 # ==============================================================================
 git commit --cleanup=strip -F "$COMMIT_MSG_FILE"
+COMMIT_STATUS=$?
 rm -f "$COMMIT_MSG_FILE"
+
+if [ $COMMIT_STATUS -eq 0 ]; then
+  wait_and_exit 3 0
+else
+  wait_and_exit 5 $COMMIT_STATUS
+fi

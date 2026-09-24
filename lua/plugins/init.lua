@@ -97,6 +97,15 @@ return {
       { "<leader>cc", "<cmd>VenvSelectCached<cr>", desc = "Select Cached VirtualEnv" },
     },
   },
+  {
+    "nvim-tree/nvim-tree.lua",
+    opts = {
+      filters = {
+        dotfiles = false,
+        exclude = { "[/\\]%.env" },
+      },
+    },
+  },
   -- test new blink
   -- { import = "nvchad.blink.lazyspec" },
 

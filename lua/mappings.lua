@@ -12,6 +12,9 @@ map("i", "jk", "<ESC>")
 -- Alternar renderizado Markdown en el buffer de Neovim
 map("n", "<Space>mr", "<cmd>RenderMarkdown toggle<cr>", { desc = "Toggle Render Markdown" })
 
+-- Previsualización Markdown en el navegador
+map("n", "<leader>mp", "<cmd>MarkdownPreviewToggle<cr>", { desc = "Toggle Markdown Preview (Browser)" })
+
 -- Mantener la selección al indentar en modo visual
 map("v", ">", ">gv", { desc = "Aumentar indentación y mantener selección" })
 map("v", "<", "<gv", { desc = "Disminuir indentación y mantener selección" })

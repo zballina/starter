@@ -11,7 +11,7 @@ git:
 customCommands:
   - key: "<c-g>"
     context: "files"
-    description: "Generate commit with Gemini"
+    description: "Generate commit with AI"
     loadingText: "Generating commit message with AI..."
     output: "terminal"
-    command: "bash \"$HOME/.config/lazygit/scripts/gemini-commit.sh\""
+    command: "bash \"$HOME/.config/lazygit/scripts/ai-commit.sh\""

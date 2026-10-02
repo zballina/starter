@@ -1,8 +1,8 @@
 require "nvchad.autocmds"
 
--- Atajo para confirmar commit de Gemini con ENTER en Modo Normal
+-- Atajo para confirmar commit generado con IA con ENTER en Modo Normal
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
-  pattern = "*gemini_commit_msg*",
+  pattern = { "*gemini_commit_msg*", "*ai_commit_msg*" },
   callback = function(args)
     vim.bo[args.buf].filetype = "gitcommit"
 

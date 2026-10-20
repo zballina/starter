@@ -24,7 +24,7 @@ class CommitFlowTests(unittest.TestCase):
                 # Adapt only TTY I/O and countdowns for a noninteractive test runner.
                 start = code.index("wait_and_exit() {")
                 end = code.index('\ncase "$AI_COMMIT_PROVIDER"', start)
-                code = code[:start] + 'wait_and_exit() { exit "${2:-0}"; }\n' + code[end:]
+                code = code[:start] + 'wait_and_exit() { echo wait >> "$TEST_LOG"; exit "${2:-0}"; }\n' + code[end:]
                 code = code.replace(' < /dev/tty > /dev/tty', '')
             (self.scripts / source.name).write_text(code)
         self.log = self.base / "calls"
@@ -32,7 +32,7 @@ class CommitFlowTests(unittest.TestCase):
                     "TMPDIR": str(self.base), "TEST_LOG": str(self.log),
                     "EDITOR": str(self.bin / "editor"), "AI_COMMIT_PROVIDER": "codex"}
         self.write("zsh", 'exit 0')
-        self.write("sleep", 'exit 0')
+        self.write("sleep", 'echo sleep >> "$TEST_LOG"; exit 0')
         self.write("git", '''printf 'git %s\\n' "$*" >> "$TEST_LOG"
 if [ "$1" = diff ]; then
   [ "$TEST_NO_STAGE" = 1 ] && exit 0
@@ -44,6 +44,7 @@ fi''')
         self.write("codex", '''printf 'codex %s\\n' "$*" >> "$TEST_LOG"
 [ "$1" = login ] && exit "${TEST_AUTH_EXIT:-0}"
 cat > "$HOME/prompt"
+printf 'diff --git a/file.lua b/file.lua\\n+change\\n' >&2
 [ "$TEST_CODEX_FAIL" = 1 ] && exit 1
 while [ "$#" -gt 0 ]; do
   if [ "$1" = --output-last-message ]; then shift; printf '%s' "${TEST_MESSAGE-fix: update file}" > "$1"; fi
@@ -70,6 +71,7 @@ printf '%s' '{"candidates":[{"content":{"parts":[{"text":"fix: update file"}]}}]
         result = subprocess.run(["/bin/bash", str(self.scripts / entry)], env=env,
                                 capture_output=True, text=True, timeout=10)
         code = result.returncode
+        self.output = result.stdout + result.stderr
         calls = self.log.read_text() if self.log.exists() else ""
         self.assertFalse(list(self.base.glob("ai_commit_*")), "temporary files leaked")
         return code, calls
@@ -84,6 +86,27 @@ printf '%s' '{"candidates":[{"content":{"parts":[{"text":"fix: update file"}]}}]
         self.assertNotIn("curl", calls)
         self.assertNotIn("+last", (self.base / "prompt").read_text())
         self.assertTrue((self.base / "committed").read_text().startswith("fix: update file\n"))
+        self.assertNotIn("diff --git", self.output)
+        self.assertNotIn("wait", calls)
+
+    def test_codex_failure_shows_diagnostics(self):
+        code, calls = self.run_flow(TEST_CODEX_FAIL="1")
+        self.assertEqual(code, 1)
+        self.assertIn("diff --git", self.output)
+        self.assertNotIn("editor", calls)
+        self.assertNotIn("git commit", calls)
+
+    def test_exit_timeout_does_not_sleep_again(self):
+        source = (ROOT / "lazygit/scripts/ai-commit.sh").read_text()
+        start = source.index("wait_and_exit() {")
+        end = source.index('\ncase "$AI_COMMIT_PROVIDER"', start)
+        helper = source[start:end].replace("/dev/tty", "/dev/null")
+        # Simulate read timing out after its own wait, without a real terminal.
+        result = subprocess.run(
+            ["/bin/bash", "-c", 'read() { return 142; }\n' + helper + '\nwait_and_exit 1 7'],
+            env=self.env, capture_output=True, text=True, timeout=2)
+        self.assertEqual(result.returncode, 7)
+        self.assertFalse(self.log.exists())
 
     def test_abort_and_failures_never_commit(self):
         for settings in ({"TEST_EDITOR_EXIT": "1"}, {"TEST_EDITOR_EMPTY": "1"},

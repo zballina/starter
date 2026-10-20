@@ -50,3 +50,30 @@ Codex runs in a read-only sandbox in a temporary directory and receives the diff
 via stdin. It only generates the message; the shell script performs the commit
 after editor confirmation. Errors and invalid output abort the flow without
 switching providers. The installer checks dependencies for the selected provider.
+
+# Prueba de Neo-tree con varios repositorios
+
+Neo-tree se abre a la derecha con `Espacio g e` y convive con NvimTree
+(`Ctrl-n`) y el selector de LazyGit (`Espacio g g`). Reinicia NvChad después
+de instalarlo para cargar el nuevo atajo.
+
+Desde el directorio que contiene los repositorios, abre NvChad y pulsa
+`Espacio g e`. También puedes indicar una raíz desde Neovim:
+
+```vim
+:Neotree filesystem right dir=/ruta/al/directorio/raiz
+```
+
+Despliega las carpetas de los repositorios con `Enter` o `Espacio` para que
+Neo-tree detecte su estado Git. Los archivos muestran `S` para cambios en
+stage, `U` para cambios sin stage, `?` para archivos nuevos y `!` para
+conflictos, junto con indicadores del tipo de cambio. Si un archivo tiene
+cambios en stage y sin stage, aparecen dos indicadores del tipo de cambio.
+Pulsa `R` para actualizar el árbol y volver a consultar el estado Git de los
+repositorios ya detectados bajo esa raíz. Este atajo incluye un ajuste local
+porque el refresco original puede conservar estados de repositorios anidados.
+Pulsa `?` para consultar los atajos y `q` para cerrar.
+
+Esta prueba utiliza el árbol de archivos: no agrupa todos los archivos
+modificados en una lista global. La raíz de Neo-tree no cambia al abrir un
+archivo y navegar por el árbol no cambia el directorio de trabajo de Neovim.

@@ -13,8 +13,9 @@ wait_and_exit() {
   local seconds="${1:-5}"
   local code="${2:-0}"
   echo ""
-  if [ -e /dev/tty ]; then
-    read -t "$seconds" -n 1 -s -r -p "⏳ Cerrando automáticamente en ${seconds}s (o presiona cualquier tecla)..." < /dev/tty > /dev/tty 2>/dev/null || sleep "$seconds"
+  if { exec 3<> /dev/tty; } 2>/dev/null; then
+    read -t "$seconds" -n 1 -s -r -p "⏳ Cerrando automáticamente en ${seconds}s (o presiona cualquier tecla)..." <&3 >&3 2>/dev/null || true
+    exec 3>&-
     echo ""
   else
     sleep "$seconds"
@@ -172,8 +173,10 @@ else
   CODEX_ARGS=(exec --sandbox read-only --ephemeral --color never --skip-git-repo-check --cd "$CODEX_OUTPUT_DIR" --output-last-message "$CODEX_OUTPUT_DIR/message")
   [ -z "$CODEX_COMMIT_MODEL" ] || CODEX_ARGS+=(--model "$CODEX_COMMIT_MODEL")
   echo "Generating commit message with Codex..."
-  if ! printf '%s\n' "$PROMPT" | "$CODEX_COMMIT_BIN" "${CODEX_ARGS[@]}" - > /dev/null; then
+  if ! printf '%s\n' "$PROMPT" | "$CODEX_COMMIT_BIN" "${CODEX_ARGS[@]}" - > /dev/null 2> "$CODEX_OUTPUT_DIR/stderr"; then
     echo "Error: Codex no pudo generar el mensaje. No se cambiará de proveedor automáticamente."
+    # Show diagnostics only on failure, keeping successful generation quiet.
+    cat "$CODEX_OUTPUT_DIR/stderr" >&2
     wait_and_exit 5 1
   fi
   if [ ! -s "$CODEX_OUTPUT_DIR/message" ]; then
@@ -234,7 +237,7 @@ COMMIT_STATUS=$?
 rm -f "$COMMIT_MSG_FILE"
 
 if [ $COMMIT_STATUS -eq 0 ]; then
-  wait_and_exit 3 0
+  exit 0
 else
   wait_and_exit 5 $COMMIT_STATUS
 fi

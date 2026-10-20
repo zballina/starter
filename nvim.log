@@ -1,0 +1,2 @@
+WRN 2026-10-19T21:29:38.366 ?.34952    server_start:197: Failed to start server: operation not permitted: /var/folders/r3/b8hf7gln5vl4n_px44rqlfw00000gn/T/nvim.francisco/HbkoRM/nvim.34952.0
+WRN 2026-10-20T01:26:53.935 c/nvim-nvchad.1046.0 server_start:197: Failed to start server: operation not permitted: /var/folders/r3/b8hf7gln5vl4n_px44rqlfw00000gn/T/nvim.francisco/X3xuYV/nvim-nvchad.25542.0

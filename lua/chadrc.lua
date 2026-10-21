@@ -5,6 +5,12 @@
 ---@type ChadrcConfig
 local M = {}
 
+M.ui = {
+  tabufline = {
+    treeOffsetFt = "neo-tree",
+  },
+}
+
 M.base46 = {
 	theme = "decay",
 

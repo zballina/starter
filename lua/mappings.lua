@@ -4,6 +4,9 @@ require "nvchad.mappings"
 
 local map = vim.keymap.set
 
+map("n", "<C-n>", "<cmd>Neotree toggle filesystem left<CR>", { desc = "Toggle Neo-tree" })
+map("n", "<leader>e", "<cmd>Neotree focus filesystem left<CR>", { desc = "Focus Neo-tree" })
+
 map("n", ";", ":", { desc = "CMD enter command mode" })
 map("i", "jk", "<ESC>")
 

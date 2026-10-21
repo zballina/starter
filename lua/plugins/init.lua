@@ -102,19 +102,7 @@ return {
   },
   {
     "nvim-tree/nvim-tree.lua",
-    opts = {
-      view = {
-        width = 45,
-      },
-      filters = {
-        dotfiles = false,
-        exclude = { "[/\\]%.env" },
-      },
-      git = {
-        enable = true,
-        timeout = 5000,
-      },
-    },
+    enabled = false,
   },
   -- test new blink
   -- { import = "nvchad.blink.lazyspec" },

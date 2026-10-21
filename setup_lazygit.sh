@@ -8,12 +8,12 @@ ZSHRC="$HOME/.zshrc"
 source "$REPO_LAZYGIT/scripts/ai-commit-env.sh"
 load_ai_commit_environment
 case "$AI_COMMIT_PROVIDER" in
-  gemini|codex) ;;
-  *) echo "Error: AI_COMMIT_PROVIDER debe ser gemini o codex."; exit 1 ;;
+  gemini|codex|antigravity) ;;
+  *) echo "Error: AI_COMMIT_PROVIDER debe ser gemini, codex o antigravity."; exit 1 ;;
 esac
 
 echo "========================================================"
-echo "🚀 Configurando LazyGit con integración de IA (Gemini / Codex)..."
+echo "🚀 Configurando LazyGit con integración de IA (Gemini / Codex / Antigravity)..."
 echo "========================================================"
 
 # ------------------------------------------------------------------------------
@@ -100,14 +100,8 @@ if [ "$AI_COMMIT_PROVIDER" = gemini ]; then
   fi
 
 else
-  if ! command -v "${CODEX_COMMIT_BIN:-codex}" >/dev/null 2>&1; then
-    echo "Error: Instala Codex CLI o configura CODEX_COMMIT_BIN antes de continuar."
-    exit 1
-  fi
-  if ! "${CODEX_COMMIT_BIN:-codex}" login status >/dev/null 2>&1; then
-    echo "Error: Ejecuta codex login antes de continuar."
-    exit 1
-  fi
+  source "$REPO_LAZYGIT/scripts/ai-commit-$AI_COMMIT_PROVIDER.sh"
+  prepare_ai_commit_provider || exit 1
 fi
 
 # ------------------------------------------------------------------------------

@@ -36,7 +36,15 @@ class CommitFlowTests(unittest.TestCase):
         self.write("git", '''printf 'git %s\\n' "$*" >> "$TEST_LOG"
 if [ "$1" = diff ]; then
   [ "$TEST_NO_STAGE" = 1 ] && exit 0
-  if [ "$3" = --name-only ]; then echo file.lua; else printf 'diff --git a/file.lua b/file.lua\\n+change\\n+last\\n'; fi
+  if [ "$3" = --name-only ]; then
+    echo file.lua
+  elif [ "$TEST_MINIFIED_DIFF" = 1 ]; then
+    printf 'diff --git a/normal.lua b/normal.lua\\n+local x = 1\\ndiff --git a/bundle.js b/bundle.js\\n+'
+    for _ in $(seq 1 60); do printf '1234567890'; done
+    printf '\\n'
+  else
+    printf 'diff --git a/file.lua b/file.lua\\n+change\\n+last\\n'
+  fi
 else
   cat "${@: -1}" > "$HOME/committed"
   exit "${TEST_COMMIT_EXIT:-0}"
@@ -267,6 +275,14 @@ fi''')
         self.assertEqual(rc.read_text(), before)
         self.assertTrue((self.base / ".config/lazygit").is_symlink())
         self.assertEqual(self.log.read_text(), "")
+
+    def test_minified_files_are_omitted_for_codex(self):
+        code, calls = self.run_flow(AI_COMMIT_PROVIDER="codex", TEST_MINIFIED_DIFF="1")
+        self.assertEqual(code, 0, self.output)
+        prompt = (self.base / "prompt").read_text()
+        self.assertIn("normal.lua", prompt)
+        self.assertNotIn("bundle.js", prompt)
+
 
 
 if __name__ == "__main__":

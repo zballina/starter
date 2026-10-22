@@ -59,10 +59,32 @@ if [ -z "$STAGED_FILES" ]; then
   wait_and_exit 5 0
 fi
 
-DIFF=$(git diff --cached -- ':!*.DS_Store' ':!*.lock' 2>/dev/null || true)
+DIFF=$(git diff --cached -- ':!*.DS_Store' ':!*.lock' ':!*.min.*' ':!*.bundle.*' 2>/dev/null || true)
+
+# Omitir archivos completos que contengan código minificado/empaquetado (líneas > max_len)
+AI_COMMIT_MAX_LINE_LENGTH="${AI_COMMIT_MAX_LINE_LENGTH:-500}"
+if [ -n "$DIFF" ]; then
+  DIFF=$(printf '%s\n' "$DIFF" | awk -v max_len="$AI_COMMIT_MAX_LINE_LENGTH" '
+    BEGIN { RS = "diff --git "; ORS = "" }
+    NR > 1 {
+      chunk = "diff --git " $0
+      is_minified = 0
+      n = split($0, lines, "\n")
+      for (i = 1; i <= n; i++) {
+        if (length(lines[i]) > max_len) {
+          is_minified = 1
+          break
+        }
+      }
+      if (!is_minified) {
+        print chunk
+      }
+    }
+  ')
+fi
 
 if [ -z "$DIFF" ]; then
-  echo "⚠️ Advertencia: Hay archivos staged, pero no se detectaron cambios de texto analizables (solo binarios o archivos ignorados)."
+  echo "⚠️ Advertencia: Hay archivos staged, pero no se detectaron cambios de texto analizables (solo binarios, minificados o archivos ignorados)."
   wait_and_exit 5 0
 fi
 

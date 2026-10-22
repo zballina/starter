@@ -18,7 +18,7 @@ generate_ai_commit_message() {
   AI_COMMIT_OUTPUT_DIR=$(mktemp -d "${TMPDIR:-/tmp}/ai_commit_codex.XXXXXX") || return 1
   CODEX_ARGS=(exec --sandbox read-only --ephemeral --color never --skip-git-repo-check --cd "$AI_COMMIT_OUTPUT_DIR" --output-last-message "$AI_COMMIT_OUTPUT_DIR/message")
   [ -z "$CODEX_COMMIT_MODEL" ] || CODEX_ARGS+=(--model "$CODEX_COMMIT_MODEL")
-  echo "Generating commit message with Codex..."
+  echo "Generating commit message with Codex (${PROMPT_SIZE_HUMAN:-unknown size})..."
   if ! printf '%s\n' "$PROMPT" | "$CODEX_COMMIT_BIN" "${CODEX_ARGS[@]}" - > /dev/null 2> "$AI_COMMIT_OUTPUT_DIR/stderr"; then
     echo "Error: Codex no pudo generar el mensaje. No se cambiará de proveedor automáticamente."
     # Show diagnostics only on failure, keeping successful generation quiet.

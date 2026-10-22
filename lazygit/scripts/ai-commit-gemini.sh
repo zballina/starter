@@ -55,7 +55,7 @@ generate_ai_commit_message() {
 
   for ((attempt=1; attempt<=GEMINI_MAX_RETRIES; attempt++)); do
     for CURRENT_MODEL in "${MODELS[@]}"; do
-      echo "🤖 Generating commit message with ${CURRENT_MODEL} (attempt ${attempt}/${GEMINI_MAX_RETRIES})..."
+      echo "🤖 Generating commit message with ${CURRENT_MODEL} (${PROMPT_SIZE_HUMAN:-unknown size}, attempt ${attempt}/${GEMINI_MAX_RETRIES})..."
 
       API_URL="https://generativelanguage.googleapis.com/v1beta/models/${CURRENT_MODEL}:generateContent?key=${GEMINI_API_KEY}"
 

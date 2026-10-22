@@ -97,6 +97,10 @@ PROMPT="Act as a senior software engineer. Generate a concise commit message in 
 
 $DIFF_TRUNCATED"
 
+PROMPT_BYTES=$(printf '%s' "$PROMPT" | wc -c | tr -d ' ')
+PROMPT_SIZE_HUMAN=$(awk -v b="$PROMPT_BYTES" 'BEGIN { if (b >= 1048576) printf "%.2f MB", b / 1048576; else printf "%.1f KB", b / 1024 }')
+export PROMPT_SIZE_HUMAN
+
 generate_ai_commit_message || wait_and_exit 5 1
 
 # Reject malformed output before opening the shared review flow.

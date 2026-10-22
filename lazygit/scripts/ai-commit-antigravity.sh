@@ -27,7 +27,7 @@ generate_ai_commit_message() {
   arguments=(--input-format stream-json --output-format stream-json --disable-slash-commands --sandbox --print-timeout "$ANTIGRAVITY_COMMIT_TIMEOUT")
   [ -z "$ANTIGRAVITY_COMMIT_MODEL" ] || arguments+=(--model "$ANTIGRAVITY_COMMIT_MODEL")
   request=$(jq -nc --arg prompt "$PROMPT" '{event: "user", message: {content: $prompt}}') || return 1
-  echo "Generating commit message with Antigravity..."
+  echo "Generating commit message with Antigravity (${PROMPT_SIZE_HUMAN:-unknown size})..."
   # Keep the repository outside the active workspace. Use cached account auth;
   # never extract tokens or grant tools additional permissions.
   if ! (

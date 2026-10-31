@@ -53,6 +53,10 @@ local function open_lazygit_floating(repo_path)
       if vim.api.nvim_buf_is_valid(buf) then
         vim.api.nvim_buf_delete(buf, { force = true })
       end
+      -- Refrescar el estado git de neo-tree tras salir de lazygit
+      vim.schedule(function()
+        vim.api.nvim_exec_autocmds("User", { pattern = "NeoTreeGitRefresh" })
+      end)
     end,
   })
 

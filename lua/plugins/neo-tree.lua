@@ -52,12 +52,64 @@ local function refresh_workspace_git(state)
   end
 end
 
+-- Refresca el estado git de los repos del árbol si neo-tree está abierto.
+-- Se dispara con: vim.api.nvim_exec_autocmds("User", { pattern = "NeoTreeGitRefresh" })
+local function setup_auto_git_refresh()
+  local timer = assert(vim.uv.new_timer())
+  local group = vim.api.nvim_create_augroup("NeoTreeAutoGitRefresh", { clear = true })
+
+  local function do_refresh()
+    local ok, manager = pcall(require, "neo-tree.sources.manager")
+    if not ok then
+      return
+    end
+    local state = manager.get_state "filesystem"
+    local window_ok, window_exists = pcall(require("neo-tree.ui.renderer").window_exists, state)
+    if not state or not state.path or not (window_ok and window_exists) then
+      return
+    end
+    pcall(refresh_workspace_git, state)
+  end
+
+  -- Debounce para agrupar eventos seguidos (p. ej. TermClose + on_exit).
+  local function schedule_refresh()
+    timer:stop()
+    timer:start(300, 0, vim.schedule_wrap(do_refresh))
+  end
+
+  vim.api.nvim_create_autocmd("User", {
+    group = group,
+    pattern = "NeoTreeGitRefresh",
+    callback = schedule_refresh,
+  })
+
+  -- Al volver a enfocar Neovim (cambios hechos desde otra terminal).
+  vim.api.nvim_create_autocmd("FocusGained", {
+    group = group,
+    callback = schedule_refresh,
+  })
+
+  -- Al cerrar cualquier terminal de lazygit (incl. el de lazygit.nvim).
+  vim.api.nvim_create_autocmd("TermClose", {
+    group = group,
+    callback = function(args)
+      if vim.api.nvim_buf_get_name(args.buf):lower():find("lazygit", 1, true) then
+        schedule_refresh()
+      end
+    end,
+  })
+end
+
 return {
   {
     "nvim-neo-tree/neo-tree.nvim",
     branch = "v3.x",
     lazy = false,
     cmd = "Neotree",
+    config = function(_, opts)
+      require("neo-tree").setup(opts)
+      setup_auto_git_refresh()
+    end,
     dependencies = {
       "nvim-lua/plenary.nvim",
       "MunifTanjim/nui.nvim",

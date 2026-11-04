@@ -93,37 +93,43 @@ message validation, editor review, and commit confirmation.
 References: [Antigravity headless mode](https://antigravity.google/docs/cli/headless/)
 and [authentication](https://antigravity.google/docs/install?tab=cli).
 
-# Neo-tree con varios repositorios
+# NvimTree con varios repositorios
 
-Neo-tree es el explorador de archivos y se abre a la izquierda. `Ctrl-n` lo
-muestra u oculta y `Espacio e` lo abre o enfoca. NvimTree está deshabilitado;
-el selector de LazyGit sigue disponible con `Espacio g g`. Reinicia NvChad
+NvimTree es el explorador de archivos y se abre a la izquierda. `Ctrl-n` lo
+muestra u oculta y `Espacio e` lo abre o enfoca.
+El selector de LazyGit sigue disponible con `Espacio g g`. Reinicia NvChad
 después de cambiar la configuración para cargar los atajos.
 
 Desde el directorio que contiene los repositorios, abre NvChad y pulsa
 `Ctrl-n`. También puedes indicar una raíz desde Neovim:
 
 ```vim
-:Neotree filesystem left dir=/ruta/al/directorio/raiz
+:NvimTreeOpen /ruta/al/directorio/raiz
 ```
 
 Las carpetas visibles que contienen un repositorio Git se consultan de forma
 asíncrona sin desplegarlas. Una marca `●` en la raíz del repositorio indica
 cambios pendientes, incluidos cambios en stage, sin stage, archivos nuevos y
-conflictos. Los archivos ignorados no activan la marca y los repositorios
-limpios no muestran ninguna. No se recorren recursivamente las carpetas cerradas:
+conflictos. El icono y el nombre de la carpeta usan el mismo color que la marca
+mientras hay cambios pendientes. Los archivos ignorados no activan la marca y
+los repositorios limpios no muestran ninguna. No se recorren recursivamente las carpetas cerradas:
 si un repositorio está dentro de otra carpeta, despliega esa carpeta contenedora.
 
-Despliega los repositorios con `Enter` o `Espacio` para ver el detalle.
+Despliega los repositorios con `Enter` para ver el detalle. `Espacio` queda
+reservado como prefijo de los atajos, incluido `Espacio t h` para elegir tema.
 Los archivos muestran `S` para cambios en
 stage, `U` para cambios sin stage, `?` para archivos nuevos y `!` para
-conflictos, junto con indicadores del tipo de cambio. Si un archivo tiene
-cambios en stage y sin stage, aparecen dos indicadores del tipo de cambio.
+conflictos, además de los indicadores nativos de renombrado y eliminación.
 Pulsa `R` para actualizar el árbol y volver a consultar el estado Git de los
-repositorios ya detectados bajo esa raíz. Este atajo incluye un ajuste local
-porque el refresco original puede conservar estados de repositorios anidados.
+repositorios visibles. Las marcas también se actualizan al guardar archivos,
+recuperar el foco de Neovim, reabrir el árbol y cerrar LazyGit.
+La consulta de cada repositorio es asíncrona y admite directorios con espacios
+y repositorios cuyo `.git` es un archivo, como los worktrees.
+La integración incluye un ajuste para cargar los indicadores nativos de Git al
+desplegar repositorios después de un refresco; depende de la versión de
+nvim-tree fijada en `lazy-lock.json`.
 Pulsa `?` para consultar los atajos y `q` para cerrar.
 
 El explorador utiliza el árbol de archivos: no agrupa todos los archivos
-modificados en una lista global. La raíz de Neo-tree no cambia al abrir un
+modificados en una lista global. La raíz de NvimTree no cambia al abrir un
 archivo y navegar por el árbol no cambia el directorio de trabajo de Neovim.

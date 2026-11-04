@@ -4,8 +4,8 @@ require "nvchad.mappings"
 
 local map = vim.keymap.set
 
-map("n", "<C-n>", "<cmd>Neotree toggle filesystem left<CR>", { desc = "Toggle Neo-tree" })
-map("n", "<leader>e", "<cmd>Neotree focus filesystem left<CR>", { desc = "Focus Neo-tree" })
+map("n", "<C-n>", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle NvimTree" })
+map("n", "<leader>e", "<cmd>NvimTreeFocus<CR>", { desc = "Focus NvimTree" })
 
 map("n", ";", ":", { desc = "CMD enter command mode" })
 map("i", "jk", "<ESC>")
@@ -53,9 +53,9 @@ local function open_lazygit_floating(repo_path)
       if vim.api.nvim_buf_is_valid(buf) then
         vim.api.nvim_buf_delete(buf, { force = true })
       end
-      -- Refrescar el estado git de neo-tree tras salir de lazygit
+      -- Refresh workspace Git indicators after LazyGit exits.
       vim.schedule(function()
-        vim.api.nvim_exec_autocmds("User", { pattern = "NeoTreeGitRefresh" })
+        vim.api.nvim_exec_autocmds("User", { pattern = "WorkspaceGitRefresh" })
       end)
     end,
   })

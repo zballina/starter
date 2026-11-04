@@ -7,12 +7,12 @@ local M = {}
 
 M.ui = {
   tabufline = {
-    treeOffsetFt = "neo-tree",
+    treeOffsetFt = "NvimTree",
   },
 }
 
 M.base46 = {
-	theme = "decay",
+	theme = "hiberbee",
 
 	hl_override = {
 		-- Comentarios en cursiva (opcional)
